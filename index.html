@@ -10,7 +10,6 @@
         :root { --evergreen: #2d5a27; --dark: #1a1a1a; --border-gray: #ddd; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 10px; }
         
-        /* Compact card design */
         .card { 
             background: white; padding: 20px; border-radius: 10px; 
             border: 3px solid var(--evergreen); 
@@ -21,7 +20,6 @@
         #gate { display: block; color: black; }
         #calculator { display: none; }
         
-        /* Floating Popup */
         .popup-box { 
             display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
             width: 85%; background: white; color: black; border: 3px solid var(--evergreen); 
@@ -43,8 +41,6 @@
         
         .btn { border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; width: 100%; margin-top: 8px; transition: 0.3s; }
         .btn-green { background: var(--evergreen); color: white; }
-        
-        /* PDF Logic: Gray until interacted with */
         .btn-pdf-idle { background: #eee; color: #888; }
         .btn-pdf-ready { background: var(--dark); color: white; }
 
@@ -117,7 +113,7 @@
 
         <div class="footer">
             *Vacation first, then NS 2026 taxes. Employer EI at 1.4x.<br>
-            <span class="disclaimer-link" onclick="alert('This tool is for budgetary estimation only. While we strive for accuracy based on 2026 Nova Scotia standards, EOCO is not liable for discrepancies. Verify all final numbers with a professional.')">View Terms & Disclaimer</span><br>
+            <span class="disclaimer-link" onclick="alert('This tool is for budgetary estimation only. While we strive for accuracy based on 2026 Nova Scotia standards, EOCO is not liable for discrepancies.')">View Terms & Disclaimer</span><br>
             © 2026 EOCO - Nova Scotia
         </div>
     </div>
@@ -125,7 +121,7 @@
 
 <script>
     const KEY = "NovaScotia2026"; 
-    const URL = "https://tools.eoco.ca/newcalculator/"; // Updated Domain
+    const URL = "https://tools.eoco.ca/"; // Pointing to your main tools address
     const MASTER_RATES = { vac: "4.0", cpp: "5.95", ei: "1.63", wcb: "0.00" };
 
     function handleUnlock() {
@@ -227,8 +223,7 @@
         doc.setFontSize(22); doc.text(`${total}`, 25, 138);
 
         doc.setTextColor(150); doc.setFontSize(8);
-        doc.text("*Estimate based on Nova Scotia standards. Verify numbers with a professional.", 20, 160);
-        doc.text("© 2026 EOCO - Nova Scotia", 20, 280);
+        doc.text("*Estimate based on Nova Scotia standards. © 2026 EOCO", 20, 160);
         doc.save(`EOCO_Costing_${name.replace(/\s+/g, '_')}.pdf`);
     }
 </script>
