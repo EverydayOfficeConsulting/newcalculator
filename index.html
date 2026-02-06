@@ -7,49 +7,202 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --evergreen: #2d5a27; --dark: #1a1a1a; --border-gray: #ddd; }
+        :root { --evergreen: #2d5a27; --dark: #1a1a1a; --border-gray: #ddd; --blue: #0056b3; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 10px; }
-        
-        /* Shorter, more compact card */
-        .card { 
-            background: white; padding: 20px; border-radius: 12px; 
-            border: 3px solid var(--evergreen); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 420px; width: 100%; 
-            text-align: center; position: relative;
-        }
-        
+        .card { background: white; padding: 20px; border-radius: 12px; border: 3px solid var(--evergreen); box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; position: relative; }
         #gate { display: block; color: black; }
         #calculator { display: none; }
         
-        /* Positioned slightly higher (40% instead of 50%) */
-        #welcomePopup { 
-            display: none; position: absolute; 
-            top: 40%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; height: auto;
-            background: white; color: black; 
-            border: 3px solid var(--evergreen); border-radius: 8px; 
-            z-index: 100; flex-direction: column; justify-content: center; align-items: center; 
-            padding: 20px; box-sizing: border-box;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        /* Floating Popups */
+        .popup-box { 
+            display: none; position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; background: white; color: black; border: 3px solid var(--evergreen); 
+            border-radius: 8px; z-index: 100; flex-direction: column; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .close-x { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; font-weight: bold; color: var(--evergreen); }
+        .update-popup { border-color: var(--blue); }
+        .close-x { position: absolute; top: 5px; right: 10px; font-size: 1.5rem; cursor: pointer; font-weight: bold; color: var(--evergreen); }
 
-        /* Smaller headers to save space */
         h1 { margin: 0; color: var(--dark); font-size: 1.8rem; font-weight: 800; }
-        .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 15px; text-transform: uppercase; }
-        
+        .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.8rem; margin-bottom: 15px; text-transform: uppercase; }
         label { display: block; margin: 10px 0 2px; font-weight: 600; font-size: 0.8rem; color: #666; text-align: left; }
         input { width: 100%; padding: 10px; border: 2px solid var(--border-gray); border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; text-align: center; margin-bottom: 5px; color: black; }
-        input:focus { border-color: var(--evergreen); outline: none; }
-
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; text-align: left; }
         .ei-math { font-size: 0.65rem; color: #d32f2f; font-style: italic; margin-top: 2px; min-height: 10px; font-weight: bold; }
-        
-        /* Compact Result Box */
         .result-box { background: var(--dark); color: white; padding: 15px; border-radius: 8px; margin-top: 15px; }
         .result-value { font-size: 2.4rem; font-weight: 800; margin: 0; }
-        
         .btn { border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8rem; width: 100%; margin-top: 8px; color: white; }
         .btn-green { background: var(--evergreen); }
-        .btn-dark { background: var(--dark); }
+        .btn-blue { background: var(--blue); }
         .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .qr-section { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
+        #qrcode { margin-top: 8px; padding: 5px; background: white; border: 1px solid #eee; }
+        .footer { font-size: 0.65rem; color: #777; margin-top: 15px; line-height: 1.2; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="gate">
+        <h1>EOCO</h1>
+        <div class="sub-brand">Simple Systems. Better Business.</div>
+        <p style="font-size: 0.85rem; margin-bottom: 15px;">Enter Access Code to unlock.</p>
+        <input type="password" id="passInput" placeholder="Password">
+        <button class="btn btn-green" onclick="handleUnlock()">ACCESS CALCULATOR</button>
+    </div>
+
+    <div id="calculator">
+        <div id="welcomePopup" class="popup-box">
+            <div class="close-x" onclick="closePopup('welcomePopup')">×</div>
+            <div style="font-size: 1.1rem; font-weight: 800; color: var(--evergreen); margin-bottom: 5px;">Quick Guide</div>
+            <div style="font-size: 0.8rem; color: #333; text-align: left; width: 100%;">
+                • Enter hourly wage<br>• Verify NS 2026 rates<br>• Hit "Save" to remember
+            </div>
+        </div>
+
+        <div id="updatePopup" class="popup-box update-popup">
+            <div class="close-x" style="color:var(--blue)" onclick="closePopup('updatePopup')">×</div>
+            <div style="font-size: 1.1rem; font-weight: 800; color: var(--blue); margin-bottom: 5px;">New Rates Available!</div>
+            <p style="font-size: 0.75rem; color: #333; margin-bottom: 10px;">We've updated the master tax rates for the new year.</p>
+            <button class="btn btn-blue" onclick="applyUpdate()">UPDATE TO NEW RATES</button>
+        </div>
+
+        <h1>EOCO</h1>
+        <div class="sub-brand">Simple Systems. Better Business.</div>
+        
+        <label>WAGE OR SALARY ($)</label>
+        <input type="number" id="wage" value="35.00" oninput="runMath()">
+
+        <div class="rate-grid">
+            <div><label>Vacation %</label><input type="number" id="vac" value="4.0" oninput="runMath()"></div>
+            <div><label>CPP % (2026)</label><input type="number" id="cpp" value="5.95" oninput="runMath()"></div>
+            <div>
+                <label>EI % (2026)</label>
+                <input type="number" id="ei" value="1.63" oninput="runMath()">
+                <div id="ei-actual" class="ei-math"></div>
+            </div>
+            <div><label>WCB Rate</label><input type="number" id="wcb" value="0.00" oninput="runMath()"></div>
+        </div>
+
+        <button class="btn btn-green" onclick="saveData()">SAVE MY RATES</button>
+        <div class="button-group">
+            <button class="btn" style="background:#eee; color:#444;" onclick="resetData()">RESET</button>
+            <button class="btn btn-dark" onclick="getPDF()">DOWNLOAD PDF</button>
+        </div>
+
+        <div class="result-box">
+            <div id="total" class="result-value">$0.00</div>
+            <div style="font-size: 0.65rem; color: #888; text-transform: uppercase;">Total Real Hourly Cost</div>
+        </div>
+
+        <div class="qr-section">
+            <div id="qrcode"></div>
+        </div>
+
+        <div class="footer">
+            © 2026 EOCO - Nova Scotia
+        </div>
+    </div>
+</div>
+
+<script>
+    const KEY = "NovaScotia2026"; 
+    const URL = "https://everydayofficeconsulting.github.io/newcalculator/";
+    
+    // MASTER CONTROL: Change these for 2027!
+    const MASTER_VER = "2026.4"; 
+    const MASTER_RATES = { vac: "4.0", cpp: "5.95", ei: "1.63", wcb: "0.00" };
+
+    function handleUnlock() {
+        if (document.getElementById('passInput').value === KEY) {
+            localStorage.setItem('eoco_auth', "true");
+            openApp();
+        } else { alert("Invalid Access Code."); }
+    }
+
+    window.onload = function() {
+        if (localStorage.getItem('eoco_auth') === "true") openApp();
+    };
+
+    function openApp() {
+        document.getElementById('gate').style.display = "none";
+        document.getElementById('calculator').style.display = "block";
+        
+        // Show welcome if never seen
+        if (localStorage.getItem('eoco_welcome_v4') !== "true") {
+            document.getElementById('welcomePopup').style.display = 'flex';
+            setTimeout(() => { closePopup('welcomePopup'); }, 30000);
+        }
+
+        // Check for updates
+        const savedVer = localStorage.getItem('eoco_ver');
+        if (savedVer && savedVer !== MASTER_VER) {
+            document.getElementById('updatePopup').style.display = 'flex';
+        }
+
+        // Load saved rates or master
+        if (localStorage.getItem('eoco_v')) {
+            document.getElementById('vac').value = localStorage.getItem('eoco_v');
+            document.getElementById('cpp').value = localStorage.getItem('eoco_c');
+            document.getElementById('ei').value = localStorage.getItem('eoco_e');
+            document.getElementById('wcb').value = localStorage.getItem('eoco_w');
+        } else {
+            resetData();
+        }
+        
+        runMath();
+        new QRCode(document.getElementById("qrcode"), { text: URL, width: 80, height: 80, colorDark : "#2d5a27" });
+    }
+
+    function closePopup(id) {
+        document.getElementById(id).style.display = 'none';
+        if (id === 'welcomePopup') localStorage.setItem('eoco_welcome_v4', "true");
+    }
+
+    function applyUpdate() {
+        resetData();
+        localStorage.setItem('eoco_ver', MASTER_VER);
+        closePopup('updatePopup');
+        alert("Rates updated to current standards!");
+    }
+
+    function runMath() {
+        const w = parseFloat(document.getElementById('wage').value) || 0;
+        const v = parseFloat(document.getElementById('vac').value) / 100;
+        const c = parseFloat(document.getElementById('cpp').value) / 100;
+        const e = parseFloat(document.getElementById('ei').value) || 0;
+        const wcb = parseFloat(document.getElementById('wcb').value) / 100;
+        document.getElementById('ei-actual').innerText = (e * 1.4).toFixed(3) + "% Employer";
+        const sub = w + (w * v);
+        const final = sub + (sub * c) + (sub * (e * 1.4 / 100)) + (sub * wcb);
+        document.getElementById('total').innerText = '$' + final.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    function saveData() {
+        localStorage.setItem('eoco_v', document.getElementById('vac').value);
+        localStorage.setItem('eoco_c', document.getElementById('cpp').value);
+        localStorage.setItem('eoco_e', document.getElementById('ei').value);
+        localStorage.setItem('eoco_w', document.getElementById('wcb').value);
+        localStorage.setItem('eoco_ver', MASTER_VER);
+        alert("Rates Saved!");
+    }
+
+    function resetData() {
+        document.getElementById('vac').value = MASTER_RATES.vac;
+        document.getElementById('cpp').value = MASTER_RATES.cpp;
+        document.getElementById('ei').value = MASTER_RATES.ei;
+        document.getElementById('wcb').value = MASTER_RATES.wcb;
+        runMath();
+    }
+
+    function getPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(22); doc.setTextColor(45, 90, 39);
+        doc.text("EOCO | Simple Systems", 20, 30);
+        doc.setFontSize(14); doc.setTextColor(0);
+        doc.text(`Estimated Real Cost: ${document.getElementById('total').innerText}`, 20, 60);
+        doc.save("EOCO_Estimate.pdf");
+    }
+</script>
+</body>
+</html>
