@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EOCO | Real-Cost Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; }
@@ -18,7 +19,11 @@
         .result-label { font-size: 0.8rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
         .result-value { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
         .ei-math { font-size: 0.7rem; color: #d32f2f; font-style: italic; margin-top: 4px; min-height: 12px; }
-        .btn-save { background: #d32f2f; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; }
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn { border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.8rem; }
+        .btn-save { background: #d32f2f; color: white; grid-column: span 2; padding: 14px; margin-top: 10px; }
+        .btn-reset { background: #eee; color: #444; }
+        .btn-pdf { background: #1a1a1a; color: white; }
         .footer { font-size: 0.7rem; color: #bbb; margin-top: 25px; line-height: 1.4; }
     </style>
 </head>
@@ -27,6 +32,9 @@
 <div class="card">
     <h1>EOCO</h1>
     <div class="sub-brand">BUSINESS SOLUTIONS</div>
+
+    <label>EMPLOYEE NAME / ROLE</label>
+    <input type="text" id="empName" placeholder="e.g. Lead Hand">
 
     <label>WAGE OR SALARY ($)</label>
     <input type="number" id="wage" value="35.00" oninput="calculate()">
@@ -47,11 +55,15 @@
         </div>
         <div class="rate-box">
             <label>WCB Rate</label>
-            <input type="number" id="wcb" value="2.65" oninput="calculate()">
+            <input type="number" id="wcb" value="0.00" oninput="calculate()">
         </div>
     </div>
 
-    <button class="btn-save" onclick="saveSettings()">SAVE MY RATES FOR NEXT TIME</button>
+    <button class="btn btn-save" onclick="saveSettings()">SAVE MY RATES FOR NEXT TIME</button>
+    <div class="button-group">
+        <button class="btn btn-reset" onclick="resetDefaults()">RESET TO DEFAULTS</button>
+        <button class="btn btn-pdf" onclick="downloadPDF()">DOWNLOAD PDF</button>
+    </div>
 
     <div class="result-box">
         <div class="result-label">Total Real Cost</div>
@@ -65,22 +77,32 @@
 </div>
 
 <script>
-    // 1. Function to Load saved rates when the page opens
+    const defaults = { vac: "4.0", cpp: "5.95", ei: "1.63", wcb: "0.00" };
+
     window.onload = function() {
-        if (localStorage.getItem('vac')) document.getElementById('vac').value = localStorage.getItem('vac');
-        if (localStorage.getItem('cpp')) document.getElementById('cpp').value = localStorage.getItem('cpp');
-        if (localStorage.getItem('ei')) document.getElementById('ei').value = localStorage.getItem('ei');
-        if (localStorage.getItem('wcb')) document.getElementById('wcb').value = localStorage.getItem('wcb');
+        if (localStorage.getItem('eoco_vac')) document.getElementById('vac').value = localStorage.getItem('eoco_vac');
+        if (localStorage.getItem('eoco_cpp')) document.getElementById('cpp').value = localStorage.getItem('eoco_cpp');
+        if (localStorage.getItem('eoco_ei')) document.getElementById('ei').value = localStorage.getItem('eoco_ei');
+        if (localStorage.getItem('eoco_wcb')) document.getElementById('wcb').value = localStorage.getItem('eoco_wcb');
         calculate();
     };
 
-    // 2. Function to Save rates to the user's browser
     function saveSettings() {
-        localStorage.setItem('vac', document.getElementById('vac').value);
-        localStorage.setItem('cpp', document.getElementById('cpp').value);
-        localStorage.setItem('ei', document.getElementById('ei').value);
-        localStorage.setItem('wcb', document.getElementById('wcb').value);
-        alert("Rates Saved! Your browser will remember these for next time.");
+        localStorage.setItem('eoco_vac', document.getElementById('vac').value);
+        localStorage.setItem('eoco_cpp', document.getElementById('cpp').value);
+        localStorage.setItem('eoco_ei', document.getElementById('ei').value);
+        localStorage.setItem('eoco_wcb', document.getElementById('wcb').value);
+        alert("Rates Saved Locally to your browser!");
+    }
+
+    function resetDefaults() {
+        if(confirm("Reset tax rates to 2026 Nova Scotia standards?")) {
+            document.getElementById('vac').value = defaults.vac;
+            document.getElementById('cpp').value = defaults.cpp;
+            document.getElementById('ei').value = defaults.ei;
+            document.getElementById('wcb').value = defaults.wcb;
+            calculate();
+        }
     }
 
     function calculate() {
@@ -98,6 +120,36 @@
         const total = subtotal + (subtotal * cRate) + (subtotal * employerEIRate) + (subtotal * wRate);
 
         document.getElementById('total').innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const name = document.getElementById('empName').value || "Unnamed Employee";
+        const wage = document.getElementById('wage').value;
+        const total = document.getElementById('total').innerText;
+
+        doc.setFontSize(22); doc.text("EOCO BUSINESS SOLUTIONS", 20, 30);
+        doc.setFontSize(12); doc.setTextColor(150); doc.text("REAL-COST CALCULATION REPORT", 20, 38);
+        
+        doc.setTextColor(0); doc.setFontSize(14);
+        doc.text(`Employee/Role: ${name}`, 20, 60);
+        doc.text(`Base Wage/Salary: $${wage}`, 20, 70);
+        
+        doc.setFontSize(10); doc.setTextColor(100);
+        doc.text(`Tax Breakdown:`, 20, 90);
+        doc.text(`- Vacation Pay: ${document.getElementById('vac').value}%`, 25, 96);
+        doc.text(`- CPP: ${document.getElementById('cpp').value}%`, 25, 102);
+        doc.text(`- EI (Employer 1.4x): ${document.getElementById('ei-actual').innerText}`, 25, 108);
+        doc.text(`- WCB: ${document.getElementById('wcb').value}%`, 25, 114);
+
+        doc.setFontSize(18); doc.setTextColor(211, 47, 47);
+        doc.text(`TOTAL REAL HOURLY COST: ${total}`, 20, 140);
+
+        doc.setFontSize(10); doc.setTextColor(150);
+        doc.text("Generated by EOCO Business Solutions - Nova Scotia", 20, 280);
+        
+        doc.save(`EOCO_Calculation_${name.replace(/\s+/g, '_')}.pdf`);
     }
 </script>
 
