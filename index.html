@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOCO | Real-Cost Calculator</title>
+    <title>EOCO | Simple Systems Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
@@ -34,7 +34,7 @@
 
 <div class="card">
     <h1>EOCO</h1>
-    <div class="sub-brand">Partnering in your Success</div>
+    <div class="sub-brand">Simple Systems. Better Business.</div>
 
     <label>EMPLOYEE NAME / ROLE</label>
     <input type="text" id="empName" placeholder="e.g. Lead Hand">
@@ -99,7 +99,7 @@
     }
 
     function resetDefaults() {
-        if(confirm("Reset rates to 2026 Nova Scotia standards?")) {
+        if(confirm("Reset rates to standard Nova Scotia rates?")) {
             document.getElementById('vac').value = defaults.vac;
             document.getElementById('cpp').value = defaults.cpp;
             document.getElementById('ei').value = defaults.ei;
@@ -114,14 +114,11 @@
         const cRate = parseFloat(document.getElementById('cpp').value) / 100;
         const eRateInput = parseFloat(document.getElementById('ei').value) || 0;
         const wRate = parseFloat(document.getElementById('wcb').value) / 100;
-
         const employerEIRate = (eRateInput * 1.4) / 100;
         document.getElementById('ei-actual').innerText = (eRateInput * 1.4).toFixed(3) + "% Employer Cost";
-
         const vacAmt = val * vRate;
         const subtotal = val + vacAmt;
         const total = subtotal + (subtotal * cRate) + (subtotal * employerEIRate) + (subtotal * wRate);
-
         document.getElementById('total').innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
@@ -133,30 +130,28 @@
         const total = document.getElementById('total').innerText;
 
         doc.setFontSize(22); doc.setTextColor(45, 90, 39); // Evergreen
-        doc.text("EOCO | Partnering in your Success", 20, 30);
-        
+        doc.text("EOCO | Simple Systems", 20, 30);
         doc.setFontSize(10); doc.setTextColor(150);
-        doc.text("ESTIMATE REPORT", 20, 36);
+        doc.text("REAL-COST CALCULATION REPORT", 20, 36);
 
         doc.setFontSize(14); doc.setTextColor(0);
-        doc.text(`Role: ${name}`, 20, 55);
-        doc.text(`Input Wage/Salary: $${wage}`, 20, 65);
+        doc.text(`Employee/Role: ${name}`, 20, 55);
+        doc.text(`Base Wage: $${wage}`, 20, 65);
         
         doc.setFontSize(11); doc.setTextColor(80);
-        doc.text(`Tax Rate Breakdown:`, 20, 85);
-        doc.text(`- Vacation Pay: ${document.getElementById('vac').value}%`, 25, 92);
+        doc.text(`Rate Breakdown:`, 20, 85);
+        doc.text(`- Vacation: ${document.getElementById('vac').value}%`, 25, 92);
         doc.text(`- CPP: ${document.getElementById('cpp').value}%`, 25, 99);
-        doc.text(`- EI (Employer 1.4x): ${document.getElementById('ei-actual').innerText}`, 25, 106);
+        doc.text(`- EI: ${document.getElementById('ei-actual').innerText}`, 25, 106);
         doc.text(`- WCB: ${document.getElementById('wcb').value}%`, 25, 113);
 
         doc.setFontSize(20); doc.setTextColor(45, 90, 39); // Evergreen
         doc.text(`TOTAL REAL COST: ${total}`, 20, 140);
 
         doc.setFontSize(9); doc.setTextColor(150);
-        doc.text("Disclaimer: Estimates for budgeting purposes only.", 20, 275);
         doc.text("© 2026 EOCO - Nova Scotia", 20, 282);
         
-        doc.save(`EOCO_Estimate_${name.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`EOCO_${name.replace(/\s+/g, '_')}.pdf`);
     }
 </script>
 
