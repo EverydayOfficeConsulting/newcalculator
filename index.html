@@ -10,6 +10,7 @@
         :root { --evergreen: #2d5a27; --dark: #1a1a1a; --border-gray: #ddd; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 10px; }
         
+        /* 20% reduced compact card design */
         .card { 
             background: white; padding: 20px; border-radius: 10px; 
             border: 3px solid var(--evergreen); 
@@ -20,6 +21,7 @@
         #gate { display: block; color: black; }
         #calculator { display: none; }
         
+        /* Floating Welcome Popup */
         .popup-box { 
             display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
             width: 85%; background: white; color: black; border: 3px solid var(--evergreen); 
@@ -36,16 +38,20 @@
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; text-align: left; }
         .ei-math { font-size: 0.65rem; color: #d32f2f; font-style: italic; margin-top: 2px; min-height: 10px; font-weight: bold; }
         
+        /* Highlighted Result Section */
         .result-box { background: var(--dark); color: white; padding: 15px; border-radius: 8px; margin-top: 20px; }
         .result-value { font-size: 2.2rem; font-weight: 800; margin: 0; }
         
         .btn { border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; width: 100%; margin-top: 8px; transition: 0.3s; }
         .btn-green { background: var(--evergreen); color: white; }
+        
+        /* Nudge Logic: Gray until inputs change */
         .btn-pdf-idle { background: #eee; color: #888; }
         .btn-pdf-ready { background: var(--dark); color: white; }
 
         .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
+        /* QR Code Layout */
         .qr-section { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
         #qrcode { margin-top: 5px; padding: 5px; background: white; border: 1px solid #eee; min-height: 75px; }
         
@@ -69,9 +75,9 @@
             <div class="close-x" onclick="closePopup()">×</div>
             <div style="font-size: 1rem; font-weight: 800; color: var(--evergreen); margin-bottom: 8px;">Quick Guide</div>
             <div style="font-size: 0.8rem; color: #333; text-align: left;">
-                • Enter Employee/Role Name<br>
+                • Enter Employee or Role Name<br>
                 • Input base hourly wage<br>
-                • Verify NS 2026 rates<br>
+                • Verify Nova Scotia 2026 rates<br>
                 • Hit "Save" to remember settings
             </div>
         </div>
@@ -104,7 +110,7 @@
 
         <div class="result-box">
             <div id="total" class="result-value">$0.00</div>
-            <div style="font-size: 0.6rem; color: #888; text-transform: uppercase;">Total Real Hourly Cost</div>
+            <div style="font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Total Real Hourly Cost</div>
         </div>
 
         <div class="qr-section">
@@ -121,43 +127,49 @@
 
 <script>
     const KEY = "NovaScotia2026"; 
-    const URL = "https://tools.eoco.ca/"; // Pointing to your main tools address
+    const URL = "https://tools.eoco.ca/newcalculator/"; // Final Professional Path
     const MASTER_RATES = { vac: "4.0", cpp: "5.95", ei: "1.63", wcb: "0.00" };
 
     function handleUnlock() {
         if (document.getElementById('passInput').value === KEY) {
-            localStorage.setItem('eoco_auth_final', "true");
+            localStorage.setItem('eoco_auth_verified', "true");
             initializeCalculator();
         } else { alert("Invalid Access Code."); }
     }
 
     window.onload = function() {
-        if (localStorage.getItem('eoco_auth_final') === "true") initializeCalculator();
+        if (localStorage.getItem('eoco_auth_verified') === "true") initializeCalculator();
     };
 
     function initializeCalculator() {
         document.getElementById('gate').style.display = "none";
         document.getElementById('calculator').style.display = "block";
-        if (localStorage.getItem('eoco_welcome_final') !== "true") {
+        
+        if (localStorage.getItem('eoco_welcome_verified') !== "true") {
             document.getElementById('welcomePopup').style.display = 'flex';
         }
+
+        // Load personal preferences
         if (localStorage.getItem('eoco_v')) {
             document.getElementById('vac').value = localStorage.getItem('eoco_v');
             document.getElementById('cpp').value = localStorage.getItem('eoco_c');
             document.getElementById('ei').value = localStorage.getItem('eoco_e');
             document.getElementById('wcb').value = localStorage.getItem('eoco_w');
         } else { resetData(); }
+
         runMath();
+
+        // Safe QR generation
         try {
             const qrDiv = document.getElementById("qrcode");
             qrDiv.innerHTML = "";
             new QRCode(qrDiv, { text: URL, width: 75, height: 75, colorDark : "#2d5a27" });
-        } catch(e) { console.log("QR lib loading..."); }
+        } catch(e) { console.log("QR Engine loading..."); }
     }
 
     function closePopup() {
         document.getElementById('welcomePopup').style.display = 'none';
-        localStorage.setItem('eoco_welcome_final', "true");
+        localStorage.setItem('eoco_welcome_verified', "true");
     }
 
     function runMath() {
@@ -166,7 +178,9 @@
         const c = parseFloat(document.getElementById('cpp').value) / 100;
         const e = parseFloat(document.getElementById('ei').value) || 0;
         const wcb = parseFloat(document.getElementById('wcb').value) / 100;
-        document.getElementById('ei-actual').innerText = (e * 1.4).toFixed(3) + "% Employer";
+        
+        document.getElementById('ei-actual').innerText = (e * 1.4).toFixed(3) + "% Employer Rate";
+
         const sub = w + (w * v);
         const final = sub + (sub * c) + (sub * (e * 1.4 / 100)) + (sub * wcb);
         document.getElementById('total').innerText = '$' + final.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -223,7 +237,7 @@
         doc.setFontSize(22); doc.text(`${total}`, 25, 138);
 
         doc.setTextColor(150); doc.setFontSize(8);
-        doc.text("*Estimate based on Nova Scotia standards. © 2026 EOCO", 20, 160);
+        doc.text("*Estimate based on Nova Scotia standards. © 2026 EOCO - Nova Scotia", 20, 160);
         doc.save(`EOCO_Costing_${name.replace(/\s+/g, '_')}.pdf`);
     }
 </script>
