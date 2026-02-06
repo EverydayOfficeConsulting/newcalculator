@@ -9,21 +9,20 @@
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; }
         h1 { margin: 0; color: #1a1a1a; font-size: 2.2rem; font-weight: 800; }
-        .sub-brand { color: #d32f2f; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 25px; }
+        .sub-brand { color: #2d5a27; font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
         label { display: block; margin: 15px 0 5px; font-weight: 600; font-size: 0.85rem; color: #666; text-align: left; }
         input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; }
-        input:focus { border-color: #d32f2f; outline: none; }
+        input:focus { border-color: #2d5a27; outline: none; }
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
         .rate-box input { font-size: 1rem; padding: 8px; }
         .result-box { background: #1a1a1a; color: white; padding: 25px; border-radius: 8px; margin-top: 30px; }
         .result-label { font-size: 0.8rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
         .result-value { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
-        .ei-math { font-size: 0.7rem; color: #d32f2f; font-style: italic; margin-top: 4px; min-height: 12px; }
+        .ei-math { font-size: 0.7rem; color: #2d5a27; font-style: italic; margin-top: 4px; min-height: 12px; }
         
-        /* New Button Layout */
         .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .btn { border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s; }
-        .btn-save { background: #d32f2f; color: white; grid-column: span 2; margin-top: 10px; }
+        .btn-save { background: #2d5a27; color: white; grid-column: span 2; margin-top: 10px; }
         .btn-reset { background: #eee; color: #444; }
         .btn-pdf { background: #1a1a1a; color: white; }
         .btn:hover { opacity: 0.8; }
@@ -35,7 +34,7 @@
 
 <div class="card">
     <h1>EOCO</h1>
-    <div class="sub-brand">BUSINESS SOLUTIONS</div>
+    <div class="sub-brand">Partnering in your Success</div>
 
     <label>EMPLOYEE NAME / ROLE</label>
     <input type="text" id="empName" placeholder="e.g. Lead Hand">
@@ -81,7 +80,6 @@
 </div>
 
 <script>
-    // These match your Nova Scotia 2026 standards
     const defaults = { vac: "4.0", cpp: "5.95", ei: "1.63", wcb: "0.00" };
 
     window.onload = function() {
@@ -134,14 +132,12 @@
         const wage = document.getElementById('wage').value;
         const total = document.getElementById('total').innerText;
 
-        // Branding
-        doc.setFontSize(22); doc.setTextColor(26, 26, 26);
-        doc.text("EOCO BUSINESS SOLUTIONS", 20, 30);
+        doc.setFontSize(22); doc.setTextColor(45, 90, 39); // Evergreen
+        doc.text("EOCO | Partnering in your Success", 20, 30);
         
         doc.setFontSize(10); doc.setTextColor(150);
         doc.text("ESTIMATE REPORT", 20, 36);
 
-        // Body
         doc.setFontSize(14); doc.setTextColor(0);
         doc.text(`Role: ${name}`, 20, 55);
         doc.text(`Input Wage/Salary: $${wage}`, 20, 65);
@@ -153,13 +149,12 @@
         doc.text(`- EI (Employer 1.4x): ${document.getElementById('ei-actual').innerText}`, 25, 106);
         doc.text(`- WCB: ${document.getElementById('wcb').value}%`, 25, 113);
 
-        // Result
-        doc.setFontSize(20); doc.setTextColor(211, 47, 47); // Red
+        doc.setFontSize(20); doc.setTextColor(45, 90, 39); // Evergreen
         doc.text(`TOTAL REAL COST: ${total}`, 20, 140);
 
         doc.setFontSize(9); doc.setTextColor(150);
         doc.text("Disclaimer: Estimates for budgeting purposes only.", 20, 275);
-        doc.text("© 2026 EOCO Business Solutions - Nova Scotia", 20, 282);
+        doc.text("© 2026 EOCO - Nova Scotia", 20, 282);
         
         doc.save(`EOCO_Estimate_${name.replace(/\s+/g, '_')}.pdf`);
     }
