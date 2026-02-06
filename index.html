@@ -7,26 +7,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --evergreen: #2d5a27; --dark: #1a1a1a; }
+        :root { --evergreen: #2d5a27; --dark: #1a1a1a; --border-gray: #ddd; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; position: relative; min-height: 400px; }
         
-        #gate { display: block; }
+        .card { 
+            background: white; padding: 30px; border-radius: 12px; 
+            border: 3px solid var(--evergreen); /* Evergreen Border */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; 
+            text-align: center; position: relative; min-height: 400px; 
+        }
+        
+        #gate { display: block; color: black; } /* Black Lettering */
         #calculator { display: none; }
         
-        /* Welcome Popup with Close X */
         #welcomePopup { 
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(45, 90, 39, 0.98); color: white; border-radius: 12px; 
+            background: rgba(45, 90, 39, 0.98); color: white; border-radius: 8px; 
             z-index: 100; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box;
         }
         .close-x { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; font-weight: bold; }
 
         h1 { margin: 0; color: var(--dark); font-size: 2.2rem; font-weight: 800; }
         .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
+        
         label { display: block; margin: 15px 0 5px; font-weight: 600; font-size: 0.85rem; color: #666; text-align: left; }
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; margin-bottom: 10px; }
+        input { width: 100%; padding: 12px; border: 2px solid var(--border-gray); border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; margin-bottom: 10px; color: black; }
+        input:focus { border-color: var(--evergreen); outline: none; }
+
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
+        
+        .ei-math { font-size: 0.7rem; color: #d32f2f; font-style: italic; margin-top: 4px; min-height: 12px; font-weight: bold; }
+        
         .result-box { background: var(--dark); color: white; padding: 25px; border-radius: 8px; margin-top: 30px; }
         .result-value { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
         
@@ -37,7 +48,8 @@
         
         .qr-section { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
         #qrcode { margin-top: 10px; padding: 10px; background: white; border: 1px solid #eee; }
-        .footer { font-size: 0.7rem; color: #bbb; margin-top: 25px; }
+        
+        .footer { font-size: 0.7rem; color: #777; margin-top: 25px; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -46,7 +58,7 @@
     <div id="gate">
         <h1>EOCO</h1>
         <div class="sub-brand">Simple Systems. Better Business.</div>
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">Please enter your Access Code.</p>
+        <p style="font-size: 0.9rem; margin-bottom: 20px; font-weight: 500;">Enter your Access Code to unlock the 2026 Real-Cost Calculator.</p>
         <input type="password" id="passInput" placeholder="Password">
         <button class="btn btn-green" onclick="handleUnlock()">ACCESS CALCULATOR</button>
     </div>
@@ -54,11 +66,11 @@
     <div id="calculator">
         <div id="welcomePopup">
             <div class="close-x" onclick="closeWelcome()">×</div>
-            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">How to Use</div>
-            <div style="font-size: 1rem; margin: 8px 0;">1. Enter the hourly wage</div>
-            <div style="font-size: 1rem; margin: 8px 0;">2. Adjust your tax rates</div>
-            <div style="font-size: 1rem; margin: 8px 0;">3. Hit "Save" to remember them</div>
-            <div style="margin-top: 25px; font-size: 0.75rem; opacity: 0.8;">Click the X or wait 30 seconds.</div>
+            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">Quick Guide</div>
+            <div style="font-size: 1rem; margin: 8px 0;">1. Enter the base hourly wage</div>
+            <div style="font-size: 1rem; margin: 8px 0;">2. Adjust NS 2026 rates if needed</div>
+            <div style="font-size: 1rem; margin: 8px 0;">3. Hit "Save" to lock in your rates</div>
+            <div style="margin-top: 25px; font-size: 0.75rem; opacity: 0.8;">X to close | 30s Auto-close</div>
         </div>
 
         <h1>EOCO</h1>
@@ -69,8 +81,12 @@
 
         <div class="rate-grid">
             <div><label>Vacation %</label><input type="number" id="vac" value="4.0" oninput="runMath()"></div>
-            <div><label>CPP %</label><input type="number" id="cpp" value="5.95" oninput="runMath()"></div>
-            <div><label>EI %</label><input type="number" id="ei" value="1.63" oninput="runMath()"></div>
+            <div><label>CPP % (2026 NS)</label><input type="number" id="cpp" value="5.95" oninput="runMath()"></div>
+            <div>
+                <label>EI % (2026 NS)</label>
+                <input type="number" id="ei" value="1.63" oninput="runMath()">
+                <div id="ei-actual" class="ei-math"></div>
+            </div>
             <div><label>WCB Rate</label><input type="number" id="wcb" value="0.00" oninput="runMath()"></div>
         </div>
 
@@ -82,7 +98,7 @@
 
         <div class="result-box">
             <div id="total" class="result-value">$0.00</div>
-            <div style="font-size: 0.7rem; color: #888;">TOTAL REAL HOURLY COST</div>
+            <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">Total Real Hourly Cost</div>
         </div>
 
         <div class="qr-section">
@@ -90,7 +106,11 @@
             <div id="qrcode"></div>
         </div>
 
-        <div class="footer">© 2026 EOCO - Nova Scotia</div>
+        <div class="footer">
+            *Calculates Vacation first, then taxes based on NS 2026 standards.<br>
+            Employer EI is calculated at 1.4x the employee rate.<br><br>
+            © 2026 EOCO - Nova Scotia
+        </div>
     </div>
 </div>
 
@@ -116,14 +136,12 @@
         document.getElementById('gate').style.display = "none";
         document.getElementById('calculator').style.display = "block";
         
-        // Show Welcome only if never shown before
         if (localStorage.getItem('eoco_welcome_v1') !== "true") {
             const welcome = document.getElementById('welcomePopup');
             welcome.style.display = 'flex';
-            welcomeTimer = setTimeout(closeWelcome, 30000); // 30 second timer
+            welcomeTimer = setTimeout(closeWelcome, 30000);
         }
 
-        // Load rates
         if (localStorage.getItem('eoco_v')) document.getElementById('vac').value = localStorage.getItem('eoco_v');
         if (localStorage.getItem('eoco_c')) document.getElementById('cpp').value = localStorage.getItem('eoco_c');
         if (localStorage.getItem('eoco_e')) document.getElementById('ei').value = localStorage.getItem('eoco_e');
@@ -135,18 +153,22 @@
 
     function closeWelcome() {
         document.getElementById('welcomePopup').style.display = 'none';
-        localStorage.setItem('eoco_welcome_v1', "true"); // Prevent it from showing again
-        clearTimeout(welcomeTimer); // Stop the timer if they clicked X
+        localStorage.setItem('eoco_welcome_v1', "true");
+        clearTimeout(welcomeTimer);
     }
 
     function runMath() {
         const w = parseFloat(document.getElementById('wage').value) || 0;
         const v = parseFloat(document.getElementById('vac').value) / 100;
         const c = parseFloat(document.getElementById('cpp').value) / 100;
-        const e = parseFloat(document.getElementById('ei').value) / 100;
+        const eInput = parseFloat(document.getElementById('ei').value) || 0;
         const wcb = parseFloat(document.getElementById('wcb').value) / 100;
+        
+        // Update the red sub-text
+        document.getElementById('ei-actual').innerText = (eInput * 1.4).toFixed(3) + "% Employer Rate";
+
         const sub = w + (w * v);
-        const final = sub + (sub * c) + (sub * (e * 1.4)) + (sub * wcb);
+        const final = sub + (sub * c) + (sub * (eInput * 1.4 / 100)) + (sub * wcb);
         document.getElementById('total').innerText = '$' + final.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
@@ -172,7 +194,7 @@
         doc.setFontSize(22); doc.setTextColor(45, 90, 39);
         doc.text("EOCO | Simple Systems", 20, 30);
         doc.setFontSize(14); doc.setTextColor(0);
-        doc.text(`Total Real Cost: ${document.getElementById('total').innerText}`, 20, 60);
+        doc.text(`Estimated Real Cost: ${document.getElementById('total').innerText}`, 20, 60);
         doc.save("EOCO_Estimate.pdf");
     }
 </script>
