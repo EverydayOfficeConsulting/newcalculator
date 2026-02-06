@@ -5,90 +5,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EOCO | Simple Systems Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        :root { --evergreen: #2d5a27; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; }
+        #gate { display: block; }
+        #calculator { display: none; }
         h1 { margin: 0; color: #1a1a1a; font-size: 2.2rem; font-weight: 800; }
-        .sub-brand { color: #2d5a27; font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
+        .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
         label { display: block; margin: 15px 0 5px; font-weight: 600; font-size: 0.85rem; color: #666; text-align: left; }
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; }
-        input:focus { border-color: #2d5a27; outline: none; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; margin-bottom: 10px; }
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
-        .rate-box input { font-size: 1rem; padding: 8px; }
         .result-box { background: #1a1a1a; color: white; padding: 25px; border-radius: 8px; margin-top: 30px; }
-        .result-label { font-size: 0.8rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
         .result-value { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
-        .ei-math { font-size: 0.7rem; color: #2d5a27; font-style: italic; margin-top: 4px; min-height: 12px; }
+        .btn { border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; width: 100%; margin-top: 10px; color: white; }
+        .btn-green { background: var(--evergreen); }
+        .btn-dark { background: #1a1a1a; }
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .btn { border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s; }
-        .btn-save { background: #2d5a27; color: white; grid-column: span 2; margin-top: 10px; }
-        .btn-reset { background: #eee; color: #444; }
-        .btn-pdf { background: #1a1a1a; color: white; }
-        .btn:hover { opacity: 0.8; }
+        /* QR Styling */
+        .qr-section { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
+        #qrcode { margin-top: 10px; padding: 10px; background: white; border: 1px solid #eee; }
         
-        .footer { font-size: 0.7rem; color: #bbb; margin-top: 25px; line-height: 1.4; }
+        .footer { font-size: 0.7rem; color: #bbb; margin-top: 25px; }
+        @media print { .qr-section { display: none; } } /* Keeps it off the PDF */
     </style>
 </head>
 <body>
 
-<div class="card">
+<div id="gate" class="card">
     <h1>EOCO</h1>
     <div class="sub-brand">Simple Systems. Better Business.</div>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Enter your Access Code.</p>
+    <input type="password" id="passInput" placeholder="Access Code">
+    <button class="btn btn-green" onclick="unlock()">ACCESS CALCULATOR</button>
+</div>
 
-    <label>EMPLOYEE NAME / ROLE</label>
-    <input type="text" id="empName" placeholder="e.g. Lead Hand">
-
+<div id="calculator" class="card">
+    <h1>EOCO</h1>
+    <div class="sub-brand">Simple Systems. Better Business.</div>
+    
     <label>WAGE OR SALARY ($)</label>
     <input type="number" id="wage" value="35.00" oninput="calculate()">
-    
+
     <div class="rate-grid">
-        <div class="rate-box">
-            <label>Vacation Pay %</label>
-            <input type="number" id="vac" value="4.0" oninput="calculate()">
-        </div>
-        <div class="rate-box">
-            <label>CPP % (2026 NS)</label>
-            <input type="number" id="cpp" value="5.95" oninput="calculate()">
-        </div>
-        <div class="rate-box">
-            <label>EI % (2026 NS)</label>
-            <input type="number" id="ei" value="1.63" oninput="calculate()">
-            <div id="ei-actual" class="ei-math"></div>
-        </div>
-        <div class="rate-box">
-            <label>WCB Rate</label>
-            <input type="number" id="wcb" value="0.00" oninput="calculate()">
-        </div>
+        <div><label>Vacation %</label><input type="number" id="vac" value="4.0" oninput="calculate()"></div>
+        <div><label>CPP % (2026)</label><input type="number" id="cpp" value="5.95" oninput="calculate()"></div>
+        <div><label>EI % (2026)</label><input type="number" id="ei" value="1.63" oninput="calculate()"></div>
+        <div><label>WCB Rate</label><input type="number" id="wcb" value="0.00" oninput="calculate()"></div>
     </div>
 
-    <button class="btn btn-save" onclick="saveSettings()">SAVE MY RATES FOR NEXT TIME</button>
+    <button class="btn btn-green" onclick="saveSettings()">SAVE MY RATES</button>
     <div class="button-group">
-        <button class="btn btn-reset" onclick="resetDefaults()">RESET DEFAULTS</button>
-        <button class="btn btn-pdf" onclick="downloadPDF()">DOWNLOAD PDF</button>
+        <button class="btn" style="background:#eee; color:#444;" onclick="resetDefaults()">RESET</button>
+        <button class="btn btn-dark" onclick="downloadPDF()">DOWNLOAD PDF</button>
     </div>
 
     <div class="result-box">
-        <div class="result-label">Total Real Cost</div>
+        <div style="font-size: 0.8rem; color: #888;">TOTAL REAL COST</div>
         <div id="total" class="result-value">$0.00</div>
     </div>
 
-    <div class="footer">
-        *CRA Compliant: Calculates Vacation first, then taxes.<br>
-        Employer EI calculated at 1.4x employee rate.
+    <div class="qr-section">
+        <div style="font-size: 0.75rem; font-weight: bold; color: var(--evergreen);">TAKE THIS TO THE JOB SITE</div>
+        <div style="font-size: 0.7rem; color: #999;">Scan to open on your phone</div>
+        <div id="qrcode"></div>
     </div>
+
+    <div class="footer">© 2026 EOCO - Nova Scotia</div>
 </div>
 
 <script>
-    const defaults = { vac: "4.0", cpp: "5.95", ei: "1.63", wcb: "0.00" };
+    const MASTER_PASS = "NovaScotia2026"; 
+    const appUrl = "https://everydayofficeconsulting.github.io/newcalculator/";
 
     window.onload = function() {
+        if (localStorage.getItem('eoco_access') === "granted") showCalc();
+        // Generate the QR code automatically
+        new QRCode(document.getElementById("qrcode"), {
+            text: appUrl,
+            width: 100,
+            height: 100,
+            colorDark : "#2d5a27",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    };
+
+    function unlock() {
+        if (document.getElementById('passInput').value === MASTER_PASS) {
+            localStorage.setItem('eoco_access', "granted");
+            showCalc();
+        } else { alert("Invalid Code"); }
+    }
+
+    function showCalc() {
+        document.getElementById('gate').style.display = "none";
+        document.getElementById('calculator').style.display = "block";
         if (localStorage.getItem('eoco_vac')) document.getElementById('vac').value = localStorage.getItem('eoco_vac');
         if (localStorage.getItem('eoco_cpp')) document.getElementById('cpp').value = localStorage.getItem('eoco_cpp');
         if (localStorage.getItem('eoco_ei')) document.getElementById('ei').value = localStorage.getItem('eoco_ei');
         if (localStorage.getItem('eoco_wcb')) document.getElementById('wcb').value = localStorage.getItem('eoco_wcb');
         calculate();
-    };
+    }
 
     function saveSettings() {
         localStorage.setItem('eoco_vac', document.getElementById('vac').value);
@@ -99,61 +119,33 @@
     }
 
     function resetDefaults() {
-        if(confirm("Reset rates to standard Nova Scotia rates?")) {
-            document.getElementById('vac').value = defaults.vac;
-            document.getElementById('cpp').value = defaults.cpp;
-            document.getElementById('ei').value = defaults.ei;
-            document.getElementById('wcb').value = defaults.wcb;
-            calculate();
-        }
+        document.getElementById('vac').value = "4.0";
+        document.getElementById('cpp').value = "5.95";
+        document.getElementById('ei').value = "1.63";
+        document.getElementById('wcb').value = "0.00";
+        calculate();
     }
 
     function calculate() {
         const val = parseFloat(document.getElementById('wage').value) || 0;
         const vRate = parseFloat(document.getElementById('vac').value) / 100;
         const cRate = parseFloat(document.getElementById('cpp').value) / 100;
-        const eRateInput = parseFloat(document.getElementById('ei').value) || 0;
+        const eRate = parseFloat(document.getElementById('ei').value) || 0;
         const wRate = parseFloat(document.getElementById('wcb').value) / 100;
-        const employerEIRate = (eRateInput * 1.4) / 100;
-        document.getElementById('ei-actual').innerText = (eRateInput * 1.4).toFixed(3) + "% Employer Cost";
-        const vacAmt = val * vRate;
-        const subtotal = val + vacAmt;
-        const total = subtotal + (subtotal * cRate) + (subtotal * employerEIRate) + (subtotal * wRate);
+        const sub = val + (val * vRate);
+        const total = sub + (sub * cRate) + (sub * (eRate * 1.4 / 100)) + (sub * wRate);
         document.getElementById('total').innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const name = document.getElementById('empName').value || "Unnamed Employee";
-        const wage = document.getElementById('wage').value;
-        const total = document.getElementById('total').innerText;
-
-        doc.setFontSize(22); doc.setTextColor(45, 90, 39); // Evergreen
+        doc.setFontSize(22); doc.setTextColor(45, 90, 39);
         doc.text("EOCO | Simple Systems", 20, 30);
-        doc.setFontSize(10); doc.setTextColor(150);
-        doc.text("REAL-COST CALCULATION REPORT", 20, 36);
-
         doc.setFontSize(14); doc.setTextColor(0);
-        doc.text(`Employee/Role: ${name}`, 20, 55);
-        doc.text(`Base Wage: $${wage}`, 20, 65);
-        
-        doc.setFontSize(11); doc.setTextColor(80);
-        doc.text(`Rate Breakdown:`, 20, 85);
-        doc.text(`- Vacation: ${document.getElementById('vac').value}%`, 25, 92);
-        doc.text(`- CPP: ${document.getElementById('cpp').value}%`, 25, 99);
-        doc.text(`- EI: ${document.getElementById('ei-actual').innerText}`, 25, 106);
-        doc.text(`- WCB: ${document.getElementById('wcb').value}%`, 25, 113);
-
-        doc.setFontSize(20); doc.setTextColor(45, 90, 39); // Evergreen
-        doc.text(`TOTAL REAL COST: ${total}`, 20, 140);
-
-        doc.setFontSize(9); doc.setTextColor(150);
-        doc.text("© 2026 EOCO - Nova Scotia", 20, 282);
-        
-        doc.save(`EOCO_${name.replace(/\s+/g, '_')}.pdf`);
+        doc.text(`Estimated Real Cost: ${document.getElementById('total').innerText}`, 20, 60);
+        doc.save(`EOCO_Estimate.pdf`);
     }
 </script>
-
 </body>
 </html>
