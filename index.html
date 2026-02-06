@@ -12,20 +12,26 @@
         
         .card { 
             background: white; padding: 30px; border-radius: 12px; 
-            border: 3px solid var(--evergreen); /* Evergreen Border */
+            border: 3px solid var(--evergreen); 
             box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; 
             text-align: center; position: relative; min-height: 400px; 
         }
         
-        #gate { display: block; color: black; } /* Black Lettering */
+        #gate { display: block; color: black; }
         #calculator { display: none; }
         
+        /* Styled Smaller Welcome Popup */
         #welcomePopup { 
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(45, 90, 39, 0.98); color: white; border-radius: 8px; 
-            z-index: 100; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box;
+            display: none; position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; height: auto; min-height: 200px;
+            background: white; color: black; 
+            border: 3px solid var(--evergreen); border-radius: 8px; 
+            z-index: 100; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 25px; box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .close-x { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; font-weight: bold; }
+        .close-x { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; font-weight: bold; color: var(--evergreen); }
 
         h1 { margin: 0; color: var(--dark); font-size: 2.2rem; font-weight: 800; }
         .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
@@ -35,7 +41,6 @@
         input:focus { border-color: var(--evergreen); outline: none; }
 
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
-        
         .ei-math { font-size: 0.7rem; color: #d32f2f; font-style: italic; margin-top: 4px; min-height: 12px; font-weight: bold; }
         
         .result-box { background: var(--dark); color: white; padding: 25px; border-radius: 8px; margin-top: 30px; }
@@ -66,11 +71,13 @@
     <div id="calculator">
         <div id="welcomePopup">
             <div class="close-x" onclick="closeWelcome()">×</div>
-            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">Quick Guide</div>
-            <div style="font-size: 1rem; margin: 8px 0;">1. Enter the base hourly wage</div>
-            <div style="font-size: 1rem; margin: 8px 0;">2. Adjust NS 2026 rates if needed</div>
-            <div style="font-size: 1rem; margin: 8px 0;">3. Hit "Save" to lock in your rates</div>
-            <div style="margin-top: 25px; font-size: 0.75rem; opacity: 0.8;">X to close | 30s Auto-close</div>
+            <div style="font-size: 1.2rem; font-weight: 800; color: var(--evergreen); margin-bottom: 10px;">Quick Guide</div>
+            <div style="font-size: 0.85rem; margin: 5px 0; color: #333; text-align: left; width: 100%;">
+                • Enter base hourly wage<br>
+                • Verify NS 2026 rates<br>
+                • Hit "Save" to remember them
+            </div>
+            <div style="margin-top: 15px; font-size: 0.7rem; color: #999;">Click X or wait 30s</div>
         </div>
 
         <h1>EOCO</h1>
@@ -136,7 +143,7 @@
         document.getElementById('gate').style.display = "none";
         document.getElementById('calculator').style.display = "block";
         
-        if (localStorage.getItem('eoco_welcome_v1') !== "true") {
+        if (localStorage.getItem('eoco_welcome_v2') !== "true") {
             const welcome = document.getElementById('welcomePopup');
             welcome.style.display = 'flex';
             welcomeTimer = setTimeout(closeWelcome, 30000);
@@ -153,7 +160,7 @@
 
     function closeWelcome() {
         document.getElementById('welcomePopup').style.display = 'none';
-        localStorage.setItem('eoco_welcome_v1', "true");
+        localStorage.setItem('eoco_welcome_v2', "true");
         clearTimeout(welcomeTimer);
     }
 
@@ -164,7 +171,6 @@
         const eInput = parseFloat(document.getElementById('ei').value) || 0;
         const wcb = parseFloat(document.getElementById('wcb').value) / 100;
         
-        // Update the red sub-text
         document.getElementById('ei-actual').innerText = (eInput * 1.4).toFixed(3) + "% Employer Rate";
 
         const sub = w + (w * v);
