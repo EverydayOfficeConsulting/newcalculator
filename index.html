@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOCO | Simple Systems Calculator</title>
+    <title>EOCO | Simple Systems</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --evergreen: #2d5a27; --dark: #1a1a1a; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; position: relative; min-height: 300px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; position: relative; min-height: 400px; }
         
-        /* Layout Sections */
         #gate { display: block; }
         #calculator { display: none; }
         
-        #welcomePopup, #legalModal { 
+        /* Welcome Popup with Close X */
+        #welcomePopup { 
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(45, 90, 39, 0.96); color: white; border-radius: 12px; 
-            z-index: 100; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box;
+            background: rgba(45, 90, 39, 0.98); color: white; border-radius: 12px; 
+            z-index: 100; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box;
         }
-        #legalModal { background: white; color: var(--dark); border: 2px solid var(--evergreen); text-align: left; overflow-y: auto; }
+        .close-x { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; font-weight: bold; }
 
         h1 { margin: 0; color: var(--dark); font-size: 2.2rem; font-weight: 800; }
         .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
@@ -36,9 +36,8 @@
         .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .qr-section { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
-        #qrcode { margin-top: 10px; padding: 10px; background: white; border: 1px solid #eee; min-height: 100px; }
+        #qrcode { margin-top: 10px; padding: 10px; background: white; border: 1px solid #eee; }
         .footer { font-size: 0.7rem; color: #bbb; margin-top: 25px; }
-        .legal-link { color: var(--evergreen); cursor: pointer; text-decoration: underline; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -54,18 +53,12 @@
 
     <div id="calculator">
         <div id="welcomePopup">
-            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;">Welcome to EOCO</div>
-            <div style="font-size: 0.9rem; margin: 5px 0;">• Enter the hourly wage</div>
-            <div style="font-size: 0.9rem; margin: 5px 0;">• Customize tax rates</div>
-            <div style="font-size: 0.9rem; margin: 5px 0;">• Hit "Save" for next time</div>
-        </div>
-
-        <div id="legalModal">
-            <h3 style="color: var(--evergreen); margin-top: 0;">Terms of Use</h3>
-            <p style="font-size: 0.75rem; line-height: 1.4; color: #444;">
-                This tool is for budgetary estimation purposes only and is not professional tax advice.
-            </p>
-            <button class="btn btn-dark" onclick="document.getElementById('legalModal').style.display='none'">CLOSE</button>
+            <div class="close-x" onclick="closeWelcome()">×</div>
+            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">How to Use</div>
+            <div style="font-size: 1rem; margin: 8px 0;">1. Enter the hourly wage</div>
+            <div style="font-size: 1rem; margin: 8px 0;">2. Adjust your tax rates</div>
+            <div style="font-size: 1rem; margin: 8px 0;">3. Hit "Save" to remember them</div>
+            <div style="margin-top: 25px; font-size: 0.75rem; opacity: 0.8;">Click the X or wait 30 seconds.</div>
         </div>
 
         <h1>EOCO</h1>
@@ -88,86 +81,81 @@
         </div>
 
         <div class="result-box">
-            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Total Real Cost</div>
             <div id="total" class="result-value">$0.00</div>
+            <div style="font-size: 0.7rem; color: #888;">TOTAL REAL HOURLY COST</div>
         </div>
 
         <div class="qr-section">
-            <div style="font-size: 0.75rem; font-weight: bold; color: var(--evergreen);">SEND TO PHONE</div>
+            <div style="font-size: 0.75rem; font-weight: bold; color: var(--evergreen);">OPEN ON PHONE</div>
             <div id="qrcode"></div>
         </div>
 
-        <div class="footer">
-            © 2026 EOCO - Nova Scotia<br>
-            <span class="legal-link" onclick="document.getElementById('legalModal').style.display='flex'">Terms of Use & Disclaimer</span>
-        </div>
+        <div class="footer">© 2026 EOCO - Nova Scotia</div>
     </div>
 </div>
 
 <script>
     const KEY = "NovaScotia2026"; 
     const URL = "https://everydayofficeconsulting.github.io/newcalculator/";
+    let welcomeTimer;
 
-    // 1. Check for existing access on load
     window.onload = function() {
         if (localStorage.getItem('eoco_auth') === "true") {
-            openApp(false);
+            openApp();
         }
     };
 
-    // 2. The Unlock Logic
     function handleUnlock() {
-        const input = document.getElementById('passInput').value;
-        if (input === KEY) {
+        if (document.getElementById('passInput').value === KEY) {
             localStorage.setItem('eoco_auth', "true");
-            openApp(true);
-        } else {
-            alert("Invalid Access Code. Please try again.");
-        }
+            openApp();
+        } else { alert("Invalid Access Code."); }
     }
 
-    // 3. Show the Calculator
-    function openApp(showWelcome) {
+    function openApp() {
         document.getElementById('gate').style.display = "none";
         document.getElementById('calculator').style.display = "block";
         
-        if (showWelcome) {
+        // Show Welcome only if never shown before
+        if (localStorage.getItem('eoco_welcome_v1') !== "true") {
             const welcome = document.getElementById('welcomePopup');
             welcome.style.display = 'flex';
-            setTimeout(() => { welcome.style.display = 'none'; }, 3500);
+            welcomeTimer = setTimeout(closeWelcome, 30000); // 30 second timer
         }
 
-        // Load saved rates
+        // Load rates
         if (localStorage.getItem('eoco_v')) document.getElementById('vac').value = localStorage.getItem('eoco_v');
         if (localStorage.getItem('eoco_c')) document.getElementById('cpp').value = localStorage.getItem('eoco_c');
         if (localStorage.getItem('eoco_e')) document.getElementById('ei').value = localStorage.getItem('eoco_e');
-        if (localStorage.getItem('eoco_w')) document.getElementById('wcb').value = localStorage.getItem('eoco_w');
+        if (localStorage.getItem('eoco_w')) document.getElementById('wcb').value = localStorage.getItem('eoco_wcb');
         
         runMath();
-        makeQR();
+        new QRCode(document.getElementById("qrcode"), { text: URL, width: 100, height: 100, colorDark : "#2d5a27" });
     }
 
-    // 4. Calculator Math
+    function closeWelcome() {
+        document.getElementById('welcomePopup').style.display = 'none';
+        localStorage.setItem('eoco_welcome_v1', "true"); // Prevent it from showing again
+        clearTimeout(welcomeTimer); // Stop the timer if they clicked X
+    }
+
     function runMath() {
         const w = parseFloat(document.getElementById('wage').value) || 0;
         const v = parseFloat(document.getElementById('vac').value) / 100;
         const c = parseFloat(document.getElementById('cpp').value) / 100;
         const e = parseFloat(document.getElementById('ei').value) / 100;
         const wcb = parseFloat(document.getElementById('wcb').value) / 100;
-        
         const sub = w + (w * v);
         const final = sub + (sub * c) + (sub * (e * 1.4)) + (sub * wcb);
-        
         document.getElementById('total').innerText = '$' + final.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
-    // 5. Actions
     function saveData() {
         localStorage.setItem('eoco_v', document.getElementById('vac').value);
         localStorage.setItem('eoco_c', document.getElementById('cpp').value);
         localStorage.setItem('eoco_e', document.getElementById('ei').value);
-        localStorage.setItem('eoco_w', document.getElementById('wcb').value);
-        alert("Rates Saved Locally!");
+        localStorage.setItem('eoco_wcb', document.getElementById('wcb').value);
+        alert("Rates Saved!");
     }
 
     function resetData() {
@@ -176,12 +164,6 @@
         document.getElementById('ei').value = "1.63";
         document.getElementById('wcb').value = "0.00";
         runMath();
-    }
-
-    function makeQR() {
-        const container = document.getElementById("qrcode");
-        container.innerHTML = "";
-        new QRCode(container, { text: URL, width: 100, height: 100, colorDark : "#2d5a27" });
     }
 
     function getPDF() {
