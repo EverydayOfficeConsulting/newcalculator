@@ -8,201 +8,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --evergreen: #2d5a27; --dark: #1a1a1a; --border-gray: #ddd; }
-        body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
+        body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 10px; }
         
+        /* Shorter, more compact card */
         .card { 
-            background: white; padding: 30px; border-radius: 12px; 
+            background: white; padding: 20px; border-radius: 12px; 
             border: 3px solid var(--evergreen); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; 
-            text-align: center; position: relative; min-height: 400px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 420px; width: 100%; 
+            text-align: center; position: relative;
         }
         
         #gate { display: block; color: black; }
         #calculator { display: none; }
         
-        /* Styled Smaller Welcome Popup */
+        /* Positioned slightly higher (40% instead of 50%) */
         #welcomePopup { 
             display: none; position: absolute; 
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; height: auto; min-height: 200px;
+            top: 40%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; height: auto;
             background: white; color: black; 
             border: 3px solid var(--evergreen); border-radius: 8px; 
             z-index: 100; flex-direction: column; justify-content: center; align-items: center; 
-            padding: 25px; box-sizing: border-box;
+            padding: 20px; box-sizing: border-box;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .close-x { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; font-weight: bold; color: var(--evergreen); }
 
-        h1 { margin: 0; color: var(--dark); font-size: 2.2rem; font-weight: 800; }
-        .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 25px; text-transform: uppercase; }
+        /* Smaller headers to save space */
+        h1 { margin: 0; color: var(--dark); font-size: 1.8rem; font-weight: 800; }
+        .sub-brand { color: var(--evergreen); font-weight: bold; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 15px; text-transform: uppercase; }
         
-        label { display: block; margin: 15px 0 5px; font-weight: 600; font-size: 0.85rem; color: #666; text-align: left; }
-        input { width: 100%; padding: 12px; border: 2px solid var(--border-gray); border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; margin-bottom: 10px; color: black; }
+        label { display: block; margin: 10px 0 2px; font-weight: 600; font-size: 0.8rem; color: #666; text-align: left; }
+        input { width: 100%; padding: 10px; border: 2px solid var(--border-gray); border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; text-align: center; margin-bottom: 5px; color: black; }
         input:focus { border-color: var(--evergreen); outline: none; }
 
-        .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
-        .ei-math { font-size: 0.7rem; color: #d32f2f; font-style: italic; margin-top: 4px; min-height: 12px; font-weight: bold; }
+        .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; text-align: left; }
+        .ei-math { font-size: 0.65rem; color: #d32f2f; font-style: italic; margin-top: 2px; min-height: 10px; font-weight: bold; }
         
-        .result-box { background: var(--dark); color: white; padding: 25px; border-radius: 8px; margin-top: 30px; }
-        .result-value { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
+        /* Compact Result Box */
+        .result-box { background: var(--dark); color: white; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .result-value { font-size: 2.4rem; font-weight: 800; margin: 0; }
         
-        .btn { border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; width: 100%; margin-top: 10px; color: white; }
+        .btn { border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8rem; width: 100%; margin-top: 8px; color: white; }
         .btn-green { background: var(--evergreen); }
         .btn-dark { background: var(--dark); }
-        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        .qr-section { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
-        #qrcode { margin-top: 10px; padding: 10px; background: white; border: 1px solid #eee; }
-        
-        .footer { font-size: 0.7rem; color: #777; margin-top: 25px; line-height: 1.4; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <div id="gate">
-        <h1>EOCO</h1>
-        <div class="sub-brand">Simple Systems. Better Business.</div>
-        <p style="font-size: 0.9rem; margin-bottom: 20px; font-weight: 500;">Enter your Access Code to unlock the 2026 Real-Cost Calculator.</p>
-        <input type="password" id="passInput" placeholder="Password">
-        <button class="btn btn-green" onclick="handleUnlock()">ACCESS CALCULATOR</button>
-    </div>
-
-    <div id="calculator">
-        <div id="welcomePopup">
-            <div class="close-x" onclick="closeWelcome()">×</div>
-            <div style="font-size: 1.2rem; font-weight: 800; color: var(--evergreen); margin-bottom: 10px;">Quick Guide</div>
-            <div style="font-size: 0.85rem; margin: 5px 0; color: #333; text-align: left; width: 100%;">
-                • Enter base hourly wage<br>
-                • Verify NS 2026 rates<br>
-                • Hit "Save" to remember them
-            </div>
-            <div style="margin-top: 15px; font-size: 0.7rem; color: #999;">Click X or wait 30s</div>
-        </div>
-
-        <h1>EOCO</h1>
-        <div class="sub-brand">Simple Systems. Better Business.</div>
-        
-        <label>WAGE OR SALARY ($)</label>
-        <input type="number" id="wage" value="35.00" oninput="runMath()">
-
-        <div class="rate-grid">
-            <div><label>Vacation %</label><input type="number" id="vac" value="4.0" oninput="runMath()"></div>
-            <div><label>CPP % (2026 NS)</label><input type="number" id="cpp" value="5.95" oninput="runMath()"></div>
-            <div>
-                <label>EI % (2026 NS)</label>
-                <input type="number" id="ei" value="1.63" oninput="runMath()">
-                <div id="ei-actual" class="ei-math"></div>
-            </div>
-            <div><label>WCB Rate</label><input type="number" id="wcb" value="0.00" oninput="runMath()"></div>
-        </div>
-
-        <button class="btn btn-green" onclick="saveData()">SAVE MY RATES</button>
-        <div class="button-group">
-            <button class="btn" style="background:#eee; color:#444;" onclick="resetData()">RESET</button>
-            <button class="btn btn-dark" onclick="getPDF()">DOWNLOAD PDF</button>
-        </div>
-
-        <div class="result-box">
-            <div id="total" class="result-value">$0.00</div>
-            <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">Total Real Hourly Cost</div>
-        </div>
-
-        <div class="qr-section">
-            <div style="font-size: 0.75rem; font-weight: bold; color: var(--evergreen);">OPEN ON PHONE</div>
-            <div id="qrcode"></div>
-        </div>
-
-        <div class="footer">
-            *Calculates Vacation first, then taxes based on NS 2026 standards.<br>
-            Employer EI is calculated at 1.4x the employee rate.<br><br>
-            © 2026 EOCO - Nova Scotia
-        </div>
-    </div>
-</div>
-
-<script>
-    const KEY = "NovaScotia2026"; 
-    const URL = "https://everydayofficeconsulting.github.io/newcalculator/";
-    let welcomeTimer;
-
-    window.onload = function() {
-        if (localStorage.getItem('eoco_auth') === "true") {
-            openApp();
-        }
-    };
-
-    function handleUnlock() {
-        if (document.getElementById('passInput').value === KEY) {
-            localStorage.setItem('eoco_auth', "true");
-            openApp();
-        } else { alert("Invalid Access Code."); }
-    }
-
-    function openApp() {
-        document.getElementById('gate').style.display = "none";
-        document.getElementById('calculator').style.display = "block";
-        
-        if (localStorage.getItem('eoco_welcome_v2') !== "true") {
-            const welcome = document.getElementById('welcomePopup');
-            welcome.style.display = 'flex';
-            welcomeTimer = setTimeout(closeWelcome, 30000);
-        }
-
-        if (localStorage.getItem('eoco_v')) document.getElementById('vac').value = localStorage.getItem('eoco_v');
-        if (localStorage.getItem('eoco_c')) document.getElementById('cpp').value = localStorage.getItem('eoco_c');
-        if (localStorage.getItem('eoco_e')) document.getElementById('ei').value = localStorage.getItem('eoco_e');
-        if (localStorage.getItem('eoco_w')) document.getElementById('wcb').value = localStorage.getItem('eoco_wcb');
-        
-        runMath();
-        new QRCode(document.getElementById("qrcode"), { text: URL, width: 100, height: 100, colorDark : "#2d5a27" });
-    }
-
-    function closeWelcome() {
-        document.getElementById('welcomePopup').style.display = 'none';
-        localStorage.setItem('eoco_welcome_v2', "true");
-        clearTimeout(welcomeTimer);
-    }
-
-    function runMath() {
-        const w = parseFloat(document.getElementById('wage').value) || 0;
-        const v = parseFloat(document.getElementById('vac').value) / 100;
-        const c = parseFloat(document.getElementById('cpp').value) / 100;
-        const eInput = parseFloat(document.getElementById('ei').value) || 0;
-        const wcb = parseFloat(document.getElementById('wcb').value) / 100;
-        
-        document.getElementById('ei-actual').innerText = (eInput * 1.4).toFixed(3) + "% Employer Rate";
-
-        const sub = w + (w * v);
-        const final = sub + (sub * c) + (sub * (eInput * 1.4 / 100)) + (sub * wcb);
-        document.getElementById('total').innerText = '$' + final.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
-
-    function saveData() {
-        localStorage.setItem('eoco_v', document.getElementById('vac').value);
-        localStorage.setItem('eoco_c', document.getElementById('cpp').value);
-        localStorage.setItem('eoco_e', document.getElementById('ei').value);
-        localStorage.setItem('eoco_wcb', document.getElementById('wcb').value);
-        alert("Rates Saved!");
-    }
-
-    function resetData() {
-        document.getElementById('vac').value = "4.0";
-        document.getElementById('cpp').value = "5.95";
-        document.getElementById('ei').value = "1.63";
-        document.getElementById('wcb').value = "0.00";
-        runMath();
-    }
-
-    function getPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(22); doc.setTextColor(45, 90, 39);
-        doc.text("EOCO | Simple Systems", 20, 30);
-        doc.setFontSize(14); doc.setTextColor(0);
-        doc.text(`Estimated Real Cost: ${document.getElementById('total').innerText}`, 20, 60);
-        doc.save("EOCO_Estimate.pdf");
-    }
-</script>
-</body>
-</html>
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
