@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EOCO | Employee Real-Cost Calculator</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; }
+        h1 { margin: 0; color: #1a1a1a; font-size: 2rem; }
+        .sub-brand { color: #d32f2f; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 20px; }
+        label { display: block; margin: 15px 0 5px; font-weight: 600; font-size: 0.9rem; color: #555; text-align: left; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; text-align: center; }
+        input:focus { border-color: #d32f2f; outline: none; }
+        .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; text-align: left; }
+        .rate-box { font-size: 0.8rem; }
+        .rate-box input { font-size: 0.9rem; padding: 8px; }
+        .result-box { background: #1a1a1a; color: white; padding: 25px; border-radius: 8px; margin-top: 25px; }
+        .result-label { font-size: 0.8rem; text-transform: uppercase; color: #aaa; }
+        .result-value { font-size: 2.5rem; font-weight: 800; margin: 5px 0; }
+        .ei-math { font-size: 0.7rem; color: #d32f2f; font-style: italic; margin-top: 2px; height: 10px; }
+        .footer { font-size: 0.7rem; color: #999; margin-top: 20px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>EOCO</h1>
+    <div class="sub-brand">BUSINESS SOLUTIONS</div>
+
+    <label>WAGE OR SALARY ($)</label>
+    <input type="number" id="wage" value="35.00" oninput="calculate()">
+    <p style="font-size: 0.7rem; color: #999;">(Enter hourly rate OR total annual salary)</p>
+
+    <div class="rate-grid">
+        <div class="rate-box">
+            <label>Vacation Pay %</label>
+            <input type="number" id="vac" value="4.0" oninput="calculate()">
+        </div>
+        <div class="rate-box">
+            <label>CPP (2026 NS)</label>
+            <input type="number" id="cpp" value="5.95" oninput="calculate()">
+        </div>
+        <div class="rate-box">
+            <label>EI Employee (2026 NS)</label>
+            <input type="number" id="ei" value="1.63" oninput="calculate()">
+            <div id="ei-actual" class="ei-math"></div>
+        </div>
+        <div class="rate-box">
+            <label>WCB Rate (Add Yours)</label>
+            <input type="number" id="wcb" value="0.00" oninput="calculate()">
+        </div>
+    </div>
+
+    <div class="result-box">
+        <div class="result-label">Total Real Cost</div>
+        <div id="total" class="result-value">$0.00</div>
+    </div>
+
+    <div class="footer">*Calculates Vacation first, then taxes (EI at 1.4x Employer cost).</div>
+</div>
+
+<script>
+    function calculate() {
+        const val = parseFloat(document.getElementById('wage').value) || 0;
+        const vRate = parseFloat(document.getElementById('vac').value) / 100;
+        const cRate = parseFloat(document.getElementById('cpp').value) / 100;
+        const eRate = parseFloat(document.getElementById('ei').value) || 0;
+        const wRate = parseFloat(document.getElementById('wcb').value) / 100;
+
+        const employerEI = (eRate * 1.4) / 100;
+        document.getElementById('ei-actual').innerText = (eRate * 1.4).toFixed(3) + "% Employer Cost";
+
+        // Math: Vacation first
+        const vacAmt = val * vRate;
+        const subtotal = val + vacAmt;
+
+        const total = subtotal + (subtotal * cRate) + (subtotal * employerEI) + (subtotal * wRate);
+
+        document.getElementById('total').innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    calculate();
+</script>
+
+</body>
+</html>
