@@ -9,11 +9,12 @@
     <style>
         :root { --evergreen: #2d5a27; --dark: #1a1a1a; }
         body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; position: relative; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; position: relative; min-height: 400px; }
+        
+        /* Initial States */
         #gate { display: block; }
         #calculator { display: none; }
         
-        /* Popup & Modal Overlay Styles */
         #welcomePopup, #legalModal { 
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(45, 90, 39, 0.96); color: white; border-radius: 12px; 
@@ -27,4 +28,59 @@
         input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.2rem; box-sizing: border-box; text-align: center; margin-bottom: 10px; }
         .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
         .result-box { background: var(--dark); color: white; padding: 25px; border-radius: 8px; margin-top: 30px; }
-        .result-value { font-size: 2.8rem; font-weight: 8
+        .result-value { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
+        
+        .btn { border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; width: 100%; margin-top: 10px; color: white; }
+        .btn-green { background: var(--evergreen); }
+        .btn-dark { background: var(--dark); }
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .qr-section { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; display: flex; flex-direction: column; align-items: center; }
+        #qrcode { margin-top: 10px; padding: 10px; background: white; border: 1px solid #eee; min-height: 100px; }
+        .footer { font-size: 0.7rem; color: #bbb; margin-top: 25px; }
+        .legal-link { color: var(--evergreen); cursor: pointer; text-decoration: underline; font-weight: bold; }
+        @media print { .qr-section, .btn, .sub-brand, .legal-link { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="gate">
+        <h1>EOCO</h1>
+        <div class="sub-brand">Simple Systems. Better Business.</div>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Enter your Access Code.</p>
+        <input type="password" id="passInput" placeholder="Access Code">
+        <button class="btn btn-green" onclick="unlock()">ACCESS CALCULATOR</button>
+    </div>
+
+    <div id="calculator">
+        <div id="welcomePopup">
+            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;">Welcome to EOCO</div>
+            <div style="font-size: 0.9rem; margin: 5px 0;">1. Enter the hourly wage</div>
+            <div style="font-size: 0.9rem; margin: 5px 0;">2. Customize your tax rates</div>
+            <div style="font-size: 0.9rem; margin: 5px 0;">3. Hit "Save" for next time</div>
+        </div>
+
+        <div id="legalModal">
+            <h3 style="color: var(--evergreen); margin-top: 0;">Terms of Use</h3>
+            <p style="font-size: 0.75rem; line-height: 1.4; color: #444;">
+                This tool is for budgetary estimation purposes only. 
+                <br><br>
+                1. Not professional tax advice.
+                <br>2. Verify all CRA/WCB rates.
+                <br>3. EOCO is not liable for discrepancies.
+            </p>
+            <button class="btn btn-dark" onclick="closeLegal()">CLOSE</button>
+        </div>
+
+        <h1>EOCO</h1>
+        <div class="sub-brand">Simple Systems. Better Business.</div>
+        
+        <label>WAGE OR SALARY ($)</label>
+        <input type="number" id="wage" value="35.00" oninput="calculate()">
+
+        <div class="rate-grid">
+            <div><label>Vacation %</label><input type="number" id="vac" value="4.0" oninput="calculate()"></div>
+            <div><label>CPP %</label><input type="number" id="cpp" value="5.95" oninput="calculate()"></div>
+            <div><label>EI %</label><input type="number" id="ei" value="1.63" oninput="calculate()"></div>
+            <div><label>WCB Rate</label
